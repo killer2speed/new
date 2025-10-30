@@ -257,13 +257,13 @@ function initializeApp(){
 // =================================================================
 
 function isMaintenanceTime(){
-    // فترة الصيانة المطلوبة: الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
+    // فترة الصيانة المطلوبة: الخميس (4) من 01:00 صباحاً حتى 07:00 صباحاً بالتوقيت العالمي المنسق (UTC)
     const now = new Date();
     const utcHours = now.getUTCHours();
     const utcDay = now.getUTCDay();
     
-    // الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
-    return utcDay === 4 && utcHours >= 2 && utcHours < 8;
+    // الخميس (4) من 01:00 صباحاً حتى 07:00 صباحاً بالتوقيت العالمي المنسق (UTC)
+    return utcDay === 4 && utcHours >= 1 && utcHours < 7;
 }
 
 function analyzePackage(){
