@@ -252,14 +252,7 @@ function initializeApp(){
 }
 
 
-function isMaintenanceTime(){
-    // Note: This uses the client's local time, not strictly Cairo time.
-    // الخميس (4) من 4:00 صباحاً إلى 10:00 صباحاً
-    const now = new Date();
-    const day = now.getDay();
-    const hours = now.getHours();
-    return day === 4 && hours >= 4 && hours < 10;
-}
+
 
 let userConfig = { deviceType: null, continent: null };
 let currentScanType = '';
@@ -299,7 +292,7 @@ function confirmSetup(){
 
 function initiateScan(type){
     if (!isOnline) { playErrorSound(); alert('لا يوجد اتصال بالإنترنت\nNo internet connection'); return; }
-    if (isMaintenanceTime()) { document.getElementById('maintenanceModal').style.display='flex'; playErrorSound(); return; }
+	// Maintenance check is now handled by the server API.
 
 
     // prevent starting if cooldown active
@@ -310,11 +303,11 @@ function initiateScan(type){
         return;
     }
 
-    currentScanType = type;
-    startConnection();
+	currentScanType = type;
+	startConnection(type);
 }
 
-async function startConnection(){
+async function startConnection(scanType){
     const modal = document.getElementById('connectionModal');
     const consoleLog = document.getElementById('consoleLog');
     const progressBar = document.getElementById('connectionProgress');
@@ -326,91 +319,115 @@ async function startConnection(){
     wasProcessing = true;
     playConnectSound();
 
-    const messages = [
-        'CONNECTING TO SERVER',
-        '[>] Initializing secure connection...',
-        '[>] Establishing encrypted tunnel...',
-        '[>] Connecting to ' + (userConfig.continent || 'Americas') + ' server...',
-        '[>] Device: ' + (userConfig.deviceType || 'Android') + ' detected',
-        '[>] Authenticating credentials...',
-        '[>] Spoofing user agent...',
-        '[>] Bypassing firewall restrictions...',
-        '[>] Exploiting zero-day vulnerability...',
-        '[>] Establishing backdoor access...',
-        '[>] Bypassing security protocols...',
-        '[>] Accessing game server database...',
-        '[>] Injecting analysis module...',
-        '[>] Scanning ' + currentScanType + ' box data...',
-        '[>] Extracting pack metadata...',
-        '[>] Running quantum probability simulation...',
-        '[>] Optimizing hack parameters...',
-        '[>] Processing server response...',
-        '[>] Decrypting package information...',
-        '[>] Analyzing probability algorithms...',
-        '[>] Calculating success rate...',
-        '[>] Finalizing connection...'
-    ];
-
-    startProgressBar();
-    
-    for (let i = 0; i < messages.length; i++){
-        if (!isOnline) return;
-        const line = document.createElement('div');
-        line.className = 'console-line';
-        consoleLog.appendChild(line);
-
-        const isConnecting = messages[i].includes("CONNECTING TO SERVER") || messages[i].includes("Connecting to");
-        await typewriterEffect(line, messages[i], isConnecting);
-
-        consoleLog.scrollTop = consoleLog.scrollHeight;
-    }
-}
-
-async function startProgressBar(){
-    if (!isOnline) return;
-    const progressBar = document.getElementById('connectionProgress');
-    const progressFill = document.getElementById('connectionFill');
-    const progressText = document.getElementById('connectionText');
-    progressBar.style.display = 'block';
-    const duration = (15 + Math.random() * 30) * 1000;
-    const steps = 100;
-    const stepDuration = duration / steps;
-    for (let progress = 0; progress <= 100; progress++){
-        if (!isOnline) return;
-        progressFill.style.width = progress + '%';
-        progressText.textContent = progress + '%';
-        if (progress % 10 === 0) playTickSound();
-        await sleep(stepDuration);
-    }
-    if (!isOnline) return;
-    connectionSuccess();
-}
-
-async function connectionSuccess(){
-    playSuccessBeep();
-    const line = document.createElement('div');
-    line.className = 'console-line';
-    line.style.color = '#0f0';
-    line.style.fontWeight = 'bold';
-    document.getElementById('consoleLog').appendChild(line);
-    await typewriterEffect(line, '[✓ CONNECTED TO GAME SERVER SUCCESSFULLY]', false);
-    await sleep(1200);
-    document.getElementById('connectionModal').style.display = 'none';
-    wasProcessing = false;
-    analyzePackage();
-}
-
-function analyzePackage(){
-    if (!isOnline) return;
-    playConnectSound();
-    const rand = Math.random() * 100;
-    let percentage;
-    if (rand < 50) percentage = Math.floor(Math.random()*50) + 1;
-    else if (rand < 80) percentage = Math.floor(Math.random()*25) + 51;
-    else if (rand < 95) percentage = Math.floor(Math.random()*14) + 76;
-    else percentage = Math.floor(Math.random()*6) + 90;
-    showResults(percentage);
-}
+	            const messages = [
+	                'CONNECTING TO SERVER',
+	                '[>] Initializing secure connection...',
+	                '[>] Establishing encrypted tunnel...',
+	                '[>] Connecting to ' + (userConfig.continent || 'Americas') + ' server...',
+	                '[>] Device: ' + (userConfig.deviceType || 'Android') + ' detected',
+	                '[>] Authenticating credentials...',
+	                '[>] Spoofing user agent...',
+	                '[>] Bypassing firewall restrictions...',
+	                '[>] Exploiting zero-day vulnerability...',
+	                '[>] Establishing backdoor access...',
+	                '[>] Bypassing security protocols...',
+	                '[>] Accessing game server database...',
+	                '[>] Injecting analysis module...',
+	                '[>] Scanning ' + scanType + ' box data...',
+	                '[>] Extracting pack metadata...',
+	                '[>] Running quantum probability simulation...',
+	                '[>] Optimizing hack parameters...',
+	                '[>] Processing server response...',
+	                '[>] Decrypting package information...',
+	                '[>] Analyzing probability algorithms...',
+	                '[>] Calculating success rate...',
+	                '[>] Finalizing connection...'
+	            ];
+	
+	            // Start animation and wait for it to finish
+	            await new Promise(async (resolve) => {
+	                startProgressBar();
+	                
+	                for (let i = 0; i < messages.length; i++){
+	                    if (!isOnline) return;
+	                    const line = document.createElement('div');
+	                    line.className = 'console-line';
+	                    consoleLog.appendChild(line);
+	    
+	                    const isConnecting = messages[i].includes("CONNECTING TO SERVER") || messages[i].includes("Connecting to");
+	                    await typewriterEffect(line, messages[i], isConnecting);
+	    
+	                    consoleLog.scrollTop = consoleLog.scrollHeight;
+	                }
+	                resolve();
+	            });
+	
+	            // Once animation is done, call the server API
+	            await callServerAPI(scanType);
+	        }
+	
+	        async function startProgressBar(){
+	            if (!isOnline) return;
+	            const progressBar = document.getElementById('connectionProgress');
+	            const progressFill = document.getElementById('connectionFill');
+	            const progressText = document.getElementById('connectionText');
+	            progressBar.style.display = 'block';
+	            // The duration is now fixed to match the animation time
+	            const duration = 15000; // Fixed duration for animation
+	            const steps = 100;
+	            const stepDuration = duration / steps;
+	            for (let progress = 0; progress <= 100; progress++){
+	                if (!isOnline) return;
+	                progressFill.style.width = progress + '%';
+	                progressText.textContent = progress + '%';
+	                if (progress % 10 === 0) playTickSound();
+	                await sleep(stepDuration);
+	            }
+	            if (!isOnline) return;
+	            // Do not call connectionSuccess() here, it's called after API call
+	        }
+	
+	        async function callServerAPI(scanType){
+	            try {
+	                const response = await fetch('/api/scan', {
+	                    method: 'POST',
+	                    headers: { 'Content-Type': 'application/json' },
+	                    body: JSON.stringify({ scanType, userConfig })
+	                });
+	                const result = await response.json();
+	
+	                if (result.maintenance) {
+	                    document.getElementById('connectionModal').style.display = 'none';
+	                    document.getElementById('maintenanceModal').style.display='flex'; 
+	                    playErrorSound(); 
+	                    return;
+	                }
+	
+	                // Success animation
+	                playSuccessBeep();
+	                const line = document.createElement('div');
+	                line.className = 'console-line';
+	                line.style.color = '#0f0';
+	                line.style.fontWeight = 'bold';
+	                document.getElementById('consoleLog').appendChild(line);
+	                await typewriterEffect(line, '[✓ CONNECTED TO GAME SERVER SUCCESSFULLY]', false);
+	                await sleep(1200);
+	                document.getElementById('connectionModal').style.display = 'none';
+	                wasProcessing = false;
+	
+	                // Show results using server data
+	                showResults(result.percentage, result.resultMessage, result.resultClass, result.cooldownEnd);
+	
+	            } catch (error) {
+	                console.error('API Scan Error:', error);
+	                document.getElementById('connectionModal').style.display = 'none';
+	                // Show generic error to user
+	                const errorModal = document.getElementById('errorModal');
+	                document.getElementById('errorMessage').innerHTML = 'خطأ في الاتصال بالخادم<br>Server connection error';
+	                errorModal.style.display = 'flex';
+	                playErrorSound();
+	            }
+	        }
 
 // helper to enable/disable scan buttons
 function setScanButtonsEnabled(enabled){
@@ -465,52 +482,35 @@ function checkExistingCooldown(){
     }
 }
 
-function showResults(percentage){
+function showResults(percentage, resultMessage, resultClass, cooldownEnd){
     const modal = document.getElementById('resultsModal');
-    const percentageDisplay = document.getElementById('percentageDisplay');
-    const resultMessage = document.getElementById('resultMessage');
-    modal.style.display = 'flex';
-    percentageDisplay.textContent = percentage + '%';
-
-    if (percentage <= 50){
-        playErrorSound();
-        resultMessage.className = 'result-message result-bad';
-        resultMessage.innerHTML = '😞 [النسبة غير جيدة]<br><br><strong>BAD PROBABILITY</strong><br>لا تفتح الباكج الآن<br>Do not open the package now<br><br>حاول مرة أخرى في وقت لاحق<br>Try again later for better results';
-    } else if (percentage <= 75){
-        playTickSound();
-        resultMessage.className = 'result-message result-weak';
-        resultMessage.innerHTML = '⚠️ [النسبة ضعيفة]<br><br><strong>WEAK PROBABILITY</strong><br>النسبة ليست جيدة<br>The probability is not good<br><br>يُنصح بالمحاولة مرة أخرى<br>Recommended to try again';
-    } else if (percentage <= 89){
-        playPopSound();
-        resultMessage.className = 'result-message result-medium';
-        resultMessage.innerHTML = '⚡ [النسبة متوسطة]<br><br><strong>MEDIUM PROBABILITY</strong><br>مقبول للفتح<br>Acceptable to open<br><br>لكن يُفضل المحاولة للحصول على نسبة أفضل<br>But better to try for higher percentage';
-    } else {
-        playSuccessBeep(); setTimeout(()=>playSuccessBeep(),200);
-        resultMessage.className = 'result-message result-good';
-        resultMessage.innerHTML = '✅ [النسبة جيدة للفتح]<br><br><strong>GOOD PROBABILITY!</strong><br>🎉 بالتوفيق!<br>🎉 Good luck!<br><br>الوقت مناسب للفتح<br>Perfect time to open the package';
-    }
-
-    // ======= START: Cooldown logic =======
-    const now = Date.now();
-    let cooldownEnd = parseInt(localStorage.getItem('cooldownEnd') || '0');
-
-    if (now >= cooldownEnd) {
-        // إذا لا يوجد cooldown سابق أو انتهى -> نولد واحد جديد عشوائياً
-        const randomCooldown = (120 + Math.random() * 180) * 1000; // 120s - 300s
-        cooldownEnd = now + Math.floor(randomCooldown);
-        localStorage.setItem('cooldownEnd', cooldownEnd);
-    }
-
-    // Apply the UI (banner + disabling buttons)
-    applyCooldownUI(cooldownEnd);
-    // ======= END: Cooldown logic =======
-
-    const autoTelegram = setTimeout(()=>{ openTelegram(); }, 4000);
-    allTimeouts.push(autoTelegram);
-
-    // keep previous cooldown-resume behavior (reload after countdown finished)
-    // (applyCooldownUI already removes cooldownEnd and re-enables buttons when done)
-}
+	    const percentageDisplay = document.getElementById('percentageDisplay');
+	    const resultMessageElement = document.getElementById('resultMessage');
+	    modal.style.display = 'flex';
+	    percentageDisplay.textContent = percentage + '%';
+	
+	    // Display results from server
+	    resultMessageElement.className = 'result-message ' + resultClass;
+	    resultMessageElement.innerHTML = resultMessage;
+	
+	    // Play sound based on result class
+	    if (resultClass === 'result-bad') playErrorSound();
+	    else if (resultClass === 'result-weak') playTickSound();
+	    else if (resultClass === 'result-medium') playPopSound();
+	    else { playSuccessBeep(); setTimeout(()=>playSuccessBeep(),200); }
+	
+	    // ======= START: Cooldown logic (using server-provided end time) =======
+	    localStorage.setItem('cooldownEnd', cooldownEnd);
+	    // Apply the UI (banner + disabling buttons)
+	    applyCooldownUI(cooldownEnd);
+	    // ======= END: Cooldown logic =======
+	
+	    const autoTelegram = setTimeout(()=>{ openTelegram(); }, 4000);
+	    allTimeouts.push(autoTelegram);
+	
+	    // keep previous cooldown-resume behavior (reload after countdown finished)
+	    // (applyCooldownUI already removes cooldownEnd and re-enables buttons when done)
+	}
 
 function closeResults(){ playTickSound(); document.getElementById('resultsModal').style.display='none'; }
 function rescanServer(){ 
