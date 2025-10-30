@@ -104,16 +104,16 @@
         .maintenance-warning{ background:rgba(255,0,0,0.2); border:2px solid #f00; padding:20px; margin:20px 0; text-align:center; color:#f00; font-weight:bold; }
 
         /* ====== Modified Cooldown banner: now centered & red ====== */
-        .cooldown-banner{
-            position:fixed;
-            top:50%;
-            left:50%;
-            transform:translate(-50%,-50%);
-            z-index:3000;
-            display:flex;
-            justify-content:center;
-            pointer-events:none;
-        }
+	        .cooldown-banner{
+	            position:fixed;
+	            top:0;
+	            left:0;
+	            width:100%;
+	            z-index:3000;
+	            display:flex;
+	            justify-content:center;
+	            pointer-events:none;
+	        }
         .cooldown-box{
             pointer-events:auto;
             background:rgba(24,0,0,0.98);
@@ -548,12 +548,7 @@
             checkExistingCooldown();
         }
 
-        function isMaintenanceTime(){
-            const now = new Date();
-            const day = now.getDay();
-            const hours = now.getHours();
-            return day === 4 && hours >= 4 && hours < 10;
-        }
+
 
         let userConfig = { deviceType: null, continent: null };
         let currentScanType = '';
@@ -593,7 +588,7 @@
 
         function initiateScan(type){
             if (!isOnline) { playErrorSound(); alert('لا يوجد اتصال بالإنترنت\nNo internet connection'); return; }
-            if (isMaintenanceTime()) { document.getElementById('maintenanceModal').style.display='flex'; playErrorSound(); return; }
+
 
             // prevent starting if cooldown active
             const cooldownEnd = parseInt(localStorage.getItem('cooldownEnd') || '0');
