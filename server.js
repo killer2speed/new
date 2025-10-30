@@ -23,20 +23,14 @@ try {
 
 // دالة فك التشفير (باستخدام Base64 كنموذج)
 function isMaintenanceTime(){
-    // توقيت القاهرة هو UTC+3 حاليًا (EET)
-    const CAIRO_OFFSET_HOURS = 3;
-    // Note: This uses the server's time.
-    // الخميس (4) من 4:00 صباحاً إلى 10:00 صباحاً
+    // فترة الصيانة المطلوبة: الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
     const now = new Date();
-    // تحويل توقيت الخادم (UTC) إلى توقيت القاهرة (Cairo Time)
     const utcHours = now.getUTCHours();
-    const cairoHours = (utcHours + CAIRO_OFFSET_HOURS) % 24;
-    const cairoDay = now.getUTCDay(); // اليوم هو نفسه في UTC و Cairo
+    const utcDay = now.getUTCDay();
     
-    // الخميس (4) من 4:00 صباحاً إلى 10:00 صباحاً بتوقيت القاهرة
-    return cairoDay === 4 && cairoHours >= 4 && cairoHours < 10;
-
-}
+    // الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
+    return utcDay === 4 && utcHours >= 2 && utcHours < 8;
+}}
 
 function analyzePackage(){
     const rand = Math.random() * 100;
