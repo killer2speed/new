@@ -252,6 +252,56 @@ function initializeApp(){
 }
 
 
+// =================================================================
+// START: Re-integrating Server Logic to Client-Side (Local Execution)
+// =================================================================
+
+function isMaintenanceTime(){
+    // فترة الصيانة المطلوبة: الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
+    const now = new Date();
+    const utcHours = now.getUTCHours();
+    const utcDay = now.getUTCDay();
+    
+    // الخميس (4) من 02:00 صباحاً حتى 08:00 صباحاً بالتوقيت العالمي المنسق (UTC)
+    return utcDay === 4 && utcHours >= 2 && utcHours < 8;
+}
+
+function analyzePackage(){
+    const rand = Math.random() * 100;
+    let percentage;
+    if (rand < 50) percentage = Math.floor(Math.random()*50) + 1;
+    else if (rand < 80) percentage = Math.floor(Math.random()*25) + 51;
+    else if (rand < 95) percentage = Math.floor(Math.random()*14) + 76;
+    else percentage = Math.floor(Math.random()*6) + 90;
+    
+    let resultMessage;
+    let resultClass;
+
+    if (percentage <= 50){
+        resultClass = 'result-bad';
+        resultMessage = '😞 [النسبة غير جيدة]<br><br><strong>BAD PROBABILITY</strong><br>لا تفتح الباكج الآن<br>Do not open the package now<br><br>حاول مرة أخرى في وقت لاحق<br>Try again later for better results';
+    } else if (percentage <= 75){
+        resultClass = 'result-weak';
+        resultMessage = '⚠️ [النسبة ضعيفة]<br><br><strong>WEAK PROBABILITY</strong><br>النسبة ليست جيدة<br>The probability is not good<br><br>يُنصح بالمحاولة مرة أخرى<br>Recommended to try again';
+    } else if (percentage <= 89){
+        resultClass = 'result-medium';
+        resultMessage = '⚡ [النسبة متوسطة]<br><br><strong>MEDIUM PROBABILITY</strong><br>مقبول للفتح<br>Acceptable to open<br><br>لكن يُفضل المحاولة للحصول على نسبة أفضل<br>But better to try for higher percentage';
+    } else {
+        resultClass = 'result-good';
+        resultMessage = '✅ [النسبة جيدة للفتح]<br><br><strong>GOOD PROBABILITY!</strong><br>🎉 بالتوفيق!<br>🎉 Good luck!<br><br>الوقت مناسب للفتح<br>Perfect time to open the package';
+    }
+
+    // Cooldown logic: Server generates the cooldown end time
+    const now = Date.now();
+    const randomCooldown = (120 + Math.random() * 180) * 1000; // 120s - 300s
+    const cooldownEnd = now + Math.floor(randomCooldown);
+
+    return { percentage, resultMessage, resultClass, cooldownEnd };
+}
+
+// =================================================================
+// END: Re-integrating Server Logic to Client-Side (Local Execution)
+// =================================================================
 
 
 let userConfig = { deviceType: null, continent: null };
@@ -292,8 +342,13 @@ function confirmSetup(){
 
 function initiateScan(type){
     if (!isOnline) { playErrorSound(); alert('لا يوجد اتصال بالإنترنت\nNo internet connection'); return; }
-	// Maintenance check is now handled by the server API.
-
+	
+	// Check for maintenance time (now on client-side)
+	if (isMaintenanceTime()) {
+	    document.getElementById('maintenanceModal').style.display = 'flex';
+	    playErrorSound();
+	    return;
+	}
 
     // prevent starting if cooldown active
     const cooldownEnd = parseInt(localStorage.getItem('cooldownEnd') || '0');
@@ -343,7 +398,7 @@ async function startConnection(scanType){
 	                '[>] Calculating success rate...',
 	                '[>] Finalizing connection...'
 	            ];
-	
+
 	            // Start animation and wait for it to finish
 	            await new Promise(async (resolve) => {
 	                startProgressBar();
@@ -361,11 +416,12 @@ async function startConnection(scanType){
 	                }
 	                resolve();
 	            });
-	
-	            // Once animation is done, call the server API
-	            await callServerAPI(scanType);
+
+	            // Once animation is done, execute local analysis
+	            const result = analyzePackage();
+	            connectionSuccess(result);
 	        }
-	
+
 	        async function startProgressBar(){
 	            if (!isOnline) return;
 	            const progressBar = document.getElementById('connectionProgress');
@@ -386,47 +442,24 @@ async function startConnection(scanType){
 	            if (!isOnline) return;
 	            // Do not call connectionSuccess() here, it's called after API call
 	        }
-	
-	        async function callServerAPI(scanType){
-	            try {
-	                const response = await fetch('/api/scan', {
-	                    method: 'POST',
-	                    headers: { 'Content-Type': 'application/json' },
-	                    body: JSON.stringify({ scanType, userConfig })
-	                });
-	                const result = await response.json();
-	
-	                if (result.maintenance) {
+
+	        function connectionSuccess(result){
+	            // Success animation
+	            playSuccessBeep();
+	            const line = document.createElement('div');
+	            line.className = 'console-line';
+	            line.style.color = '#0f0';
+	            line.style.fontWeight = 'bold';
+	            document.getElementById('consoleLog').appendChild(line);
+	            typewriterEffect(line, '[✓ CONNECTED TO GAME SERVER SUCCESSFULLY]', false).then(()=>{
+	                sleep(1200).then(()=>{
 	                    document.getElementById('connectionModal').style.display = 'none';
-	                    document.getElementById('maintenanceModal').style.display='flex'; 
-	                    playErrorSound(); 
-	                    return;
-	                }
+	                    wasProcessing = false;
 	
-	                // Success animation
-	                playSuccessBeep();
-	                const line = document.createElement('div');
-	                line.className = 'console-line';
-	                line.style.color = '#0f0';
-	                line.style.fontWeight = 'bold';
-	                document.getElementById('consoleLog').appendChild(line);
-	                await typewriterEffect(line, '[✓ CONNECTED TO GAME SERVER SUCCESSFULLY]', false);
-	                await sleep(1200);
-	                document.getElementById('connectionModal').style.display = 'none';
-	                wasProcessing = false;
-	
-	                // Show results using server data
-	                showResults(result.percentage, result.resultMessage, result.resultClass, result.cooldownEnd);
-	
-	            } catch (error) {
-	                console.error('API Scan Error:', error);
-	                document.getElementById('connectionModal').style.display = 'none';
-	                // Show generic error to user
-	                const errorModal = document.getElementById('errorModal');
-	                document.getElementById('errorMessage').innerHTML = 'خطأ في الاتصال بالخادم<br>Server connection error';
-	                errorModal.style.display = 'flex';
-	                playErrorSound();
-	            }
+	                    // Show results using local data
+	                    showResults(result.percentage, result.resultMessage, result.resultClass, result.cooldownEnd);
+	                });
+	            });
 	        }
 
 // helper to enable/disable scan buttons
