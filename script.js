@@ -374,47 +374,55 @@ async function startConnection(scanType){
     wasProcessing = true;
     playConnectSound();
 
-	            const messages = [
-	                'CONNECTING TO SERVER',
-	                '[>] Initializing secure connection...',
-	                '[>] Establishing encrypted tunnel...',
-	                '[>] Connecting to ' + (userConfig.continent || 'Americas') + ' server...',
-	                '[>] Device: ' + (userConfig.deviceType || 'Android') + ' detected',
-	                '[>] Authenticating credentials...',
-	                '[>] Spoofing user agent...',
-	                '[>] Bypassing firewall restrictions...',
-	                '[>] Exploiting zero-day vulnerability...',
-	                '[>] Establishing backdoor access...',
-	                '[>] Bypassing security protocols...',
-	                '[>] Accessing game server database...',
-	                '[>] Injecting analysis module...',
-	                '[>] Scanning ' + scanType + ' box data...',
-	                '[>] Extracting pack metadata...',
-	                '[>] Running quantum probability simulation...',
-	                '[>] Optimizing hack parameters...',
-	                '[>] Processing server response...',
-	                '[>] Decrypting package information...',
-	                '[>] Analyzing probability algorithms...',
-	                '[>] Calculating success rate...',
-	                '[>] Finalizing connection...'
-	            ];
+
+		            
+
+		            
+		            // Use the original messages list for the console log
+		            const consoleMessages = [
+		                'CONNECTING TO SERVER',
+		                '[>] Initializing secure connection...',
+		                '[>] Establishing encrypted tunnel...',
+		                '[>] Connecting to ' + (userConfig.continent || 'Americas') + ' server...',
+		                '[>] Device: ' + (userConfig.deviceType || 'Android') + ' detected',
+		                '[>] Authenticating credentials...',
+		                '[>] Spoofing user agent...',
+		                '[>] Bypassing firewall restrictions...',
+		                '[>] Exploiting zero-day vulnerability...',
+		                '[>] Establishing backdoor access...'
+		            ];
 
 	            // Start animation and wait for it to finish
 	            await new Promise(async (resolve) => {
-	                startProgressBar();
-	                
-	                for (let i = 0; i < messages.length; i++){
-	                    if (!isOnline) return;
-	                    const line = document.createElement('div');
-	                    line.className = 'console-line';
-	                    consoleLog.appendChild(line);
-	    
-	                    const isConnecting = messages[i].includes("CONNECTING TO SERVER") || messages[i].includes("Connecting to");
-	                    await typewriterEffect(line, messages[i], isConnecting);
-	    
-	                    consoleLog.scrollTop = consoleLog.scrollHeight;
-	                }
-	                resolve();
+		                // Calculate total duration (30 to 60 seconds)
+		                const totalDuration = Math.floor(Math.random() * (60000 - 30000 + 1)) + 30000;
+		                const totalSteps = consoleMessages.length;
+		                
+		                // Calculate the time to wait between each message (to synchronize with progress bar)
+		                const messageDelay = totalDuration / totalSteps;
+		                
+		                // Start progress bar with the calculated total duration
+		                startProgressBar(totalDuration);
+		                
+		                for (let i = 0; i < consoleMessages.length; i++){
+		                    if (!isOnline) return;
+		                    const line = document.createElement('div');
+		                    line.className = 'console-line';
+		                    consoleLog.appendChild(line);
+		    
+		                    const isConnecting = consoleMessages[i].includes("CONNECTING TO SERVER") || consoleMessages[i].includes("Connecting to");
+		                    
+		                    // Display message
+		                    await typewriterEffect(line, consoleMessages[i], isConnecting);
+		    
+		                    consoleLog.scrollTop = consoleLog.scrollHeight;
+		                    
+		                    // Wait for the calculated delay to synchronize with the progress bar
+		                    if (i < consoleMessages.length - 1) {
+		                        await sleep(messageDelay);
+		                    }
+		                }
+		                resolve();
 	            });
 
 	            // Once animation is done, execute local analysis
@@ -422,26 +430,27 @@ async function startConnection(scanType){
 	            connectionSuccess(result);
 	        }
 
-	        async function startProgressBar(){
-	            if (!isOnline) return;
-	            const progressBar = document.getElementById('connectionProgress');
-	            const progressFill = document.getElementById('connectionFill');
-	            const progressText = document.getElementById('connectionText');
-	            progressBar.style.display = 'block';
-	            // The duration is now fixed to match the animation time
-	            const duration = 15000; // Fixed duration for animation
-	            const steps = 100;
-	            const stepDuration = duration / steps;
-	            for (let progress = 0; progress <= 100; progress++){
-	                if (!isOnline) return;
-	                progressFill.style.width = progress + '%';
-	                progressText.textContent = progress + '%';
-	                if (progress % 10 === 0) playTickSound();
-	                await sleep(stepDuration);
-	            }
-	            if (!isOnline) return;
-	            // Do not call connectionSuccess() here, it's called after API call
-	        }
+		        async function startProgressBar(duration){
+		            if (!isOnline) return;
+		            const progressBar = document.getElementById('connectionProgress');
+		            const progressFill = document.getElementById('connectionFill');
+		            const progressText = document.getElementById('connectionText');
+		            progressBar.style.display = 'block';
+		            
+		            // Duration is passed from startConnection (30-60 seconds)
+		            const steps = 100;
+		            const stepDuration = duration / steps;
+		            
+		            for (let progress = 0; progress <= 100; progress++){
+		                if (!isOnline) return;
+		                progressFill.style.width = progress + '%';
+		                progressText.textContent = progress + '%';
+		                if (progress % 10 === 0) playTickSound();
+		                await sleep(stepDuration);
+		            }
+		            if (!isOnline) return;
+		            // Do not call connectionSuccess() here, it's called after the console log animation is finished
+		        }
 
 	        function connectionSuccess(result){
 	            // Success animation
