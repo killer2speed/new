@@ -23,12 +23,19 @@ try {
 
 // دالة فك التشفير (باستخدام Base64 كنموذج)
 function isMaintenanceTime(){
+    // توقيت القاهرة هو UTC+3 حاليًا (EET)
+    const CAIRO_OFFSET_HOURS = 3;
     // Note: This uses the server's time.
     // الخميس (4) من 4:00 صباحاً إلى 10:00 صباحاً
     const now = new Date();
-    const day = now.getDay();
-    const hours = now.getHours();
-    return day === 4 && hours >= 4 && hours < 10;
+    // تحويل توقيت الخادم (UTC) إلى توقيت القاهرة (Cairo Time)
+    const utcHours = now.getUTCHours();
+    const cairoHours = (utcHours + CAIRO_OFFSET_HOURS) % 24;
+    const cairoDay = now.getUTCDay(); // اليوم هو نفسه في UTC و Cairo
+    
+    // الخميس (4) من 4:00 صباحاً إلى 10:00 صباحاً بتوقيت القاهرة
+    return cairoDay === 4 && cairoHours >= 4 && cairoHours < 10;
+
 }
 
 function analyzePackage(){
