@@ -92,6 +92,8 @@ app.get('/', (req, res) => {
 
 // خدمة الملفات الثابتة (CSS, JS)
 app.use(express.static(path.join(__dirname)));
+app.use('/style.css', express.static(path.join(__dirname, 'style.css')));
+app.use('/script.js', express.static(path.join(__dirname, 'script.js')));
 app.use(express.json()); // لتمكين قراءة JSON من الطلبات
 
 // نقطة نهاية API الجديدة للتحليل
