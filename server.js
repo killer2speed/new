@@ -4,7 +4,7 @@ const path = require('path');
 
 // اسم متغير البيئة الذي يحتوي على مفتاح التشفير
 // في هذه الحالة، سنستخدمه للتحقق من أن الخادم يعمل في بيئة آمنة
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; 
+const ENCRYPTION_KEY = process.env.KEY; 
 
 // اسم الملف المشفر
 const ENCRYPTED_FILE = 'index.encrypted';
@@ -37,7 +37,7 @@ app.get('/', (req, res) => {
     // التحقق من وجود مفتاح التشفير (للتأكد من أننا لسنا في بيئة تطوير غير آمنة)
     if (!ENCRYPTION_KEY) {
         // يمكنك تعديل هذه الرسالة لتناسب احتياجاتك
-        return res.status(500).send('ERROR: ENCRYPTION_KEY environment variable is not set. Cannot decrypt content.');
+        return res.status(500).send('ERROR: KEY environment variable is not set. Cannot decrypt content.');
     }
 
     try {
@@ -54,6 +54,6 @@ app.use(express.static(path.join(__dirname)));
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-    console.log(`Using ENCRYPTION_KEY: ${ENCRYPTION_KEY ? 'Set' : 'Not Set'}`);
+    console.log(`Using KEY: ${ENCRYPTION_KEY ? 'Set' : 'Not Set'}`);
     console.log(`Serving decrypted content from ${ENCRYPTED_FILE}`);
 });
